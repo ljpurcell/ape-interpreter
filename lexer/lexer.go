@@ -1,7 +1,10 @@
 // The lexer is responsible for taking source code and turning it into tokens, which are easier to work than plain text.
 package lexer
 
-import "github.com/ljpurcell/monkey-interpreter/token"
+import (
+	"github.com/ljpurcell/monkey-interpreter/token"
+	"github.com/ljpurcell/monkey-interpreter/utils"
+)
 
 type Lexer struct {
 	input        string
@@ -29,6 +32,9 @@ func (l *Lexer) readChar() {
 
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
+
+	l.skipWhitespace()
+
 	switch l.char {
 	case '=':
 		tok = token.NewToken(token.ASSIGN, l.char)
@@ -48,10 +54,45 @@ func (l *Lexer) NextToken() token.Token {
 		tok = token.NewToken(token.RBRACE, l.char)
 	case 0:
 		tok.Literal = ""
-		tok.Type  = token.EOF
-
+		tok.Type = token.EOF
+	default:
+		if utils.IsLetter(l.char) {
+			tok.Literal = l.readIdentifier()
+			tok.Type = token.GetTypeFrom(tok.Literal)
+			return tok
+		} else if utils.IsDigit(l.char) {
+			tok.Literal = l.readNumber()
+			tok.Type = token.GetNumericType(tok.Literal)
+            return tok
+		} else {
+			tok = token.NewToken(token.ILLEGAL, l.char)
+		}
 	}
+
 	l.readChar()
 	return tok
 }
 
+func (l *Lexer) readNumber() string {
+	start := l.position
+	for utils.IsDigit(l.char) || l.char == '.' {
+		l.readChar()
+	}
+
+	return l.input[start:l.position]
+}
+
+func (l *Lexer) readIdentifier() string {
+	start := l.position
+	for utils.IsLetter(l.char) || l.char == '_' {
+		l.readChar()
+	}
+
+	return l.input[start:l.position]
+}
+
+func (l *Lexer) skipWhitespace() {
+	for l.char == ' ' || l.char == '\n' || l.char == '\t' || l.char == '\r' {
+		l.readChar()
+	}
+}

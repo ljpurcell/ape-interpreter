@@ -19,6 +19,14 @@ func NewLexer(input string) *Lexer {
 	return l
 }
 
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+}
+
 func (l *Lexer) readChar() {
 	if l.readPosition >= len(l.input) {
 		l.char = 0
@@ -37,7 +45,7 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.char {
 	case '=':
-		tok = token.NewToken(token.ASSIGN, l.char)
+        tok = l.getAssignOrEquals()
 	case ';':
 		tok = token.NewToken(token.SEMICOLON, l.char)
 	case '(':
@@ -46,12 +54,24 @@ func (l *Lexer) NextToken() token.Token {
 		tok = token.NewToken(token.RPAREN, l.char)
 	case ',':
 		tok = token.NewToken(token.COMMA, l.char)
+	case '*':
+		tok = token.NewToken(token.MULTIPLY, l.char)
+	case '/':
+		tok = token.NewToken(token.DIVIDE, l.char)
 	case '+':
 		tok = token.NewToken(token.PLUS, l.char)
+	case '-':
+		tok = token.NewToken(token.MINUS, l.char)
 	case '{':
 		tok = token.NewToken(token.LBRACE, l.char)
 	case '}':
 		tok = token.NewToken(token.RBRACE, l.char)
+	case '!':
+    tok = l.getNotOrNotEquals()
+	case '<':
+		tok = token.NewToken(token.LT, l.char)
+	case '>':
+		tok = token.NewToken(token.GT, l.char)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -63,7 +83,7 @@ func (l *Lexer) NextToken() token.Token {
 		} else if utils.IsDigit(l.char) {
 			tok.Literal = l.readNumber()
 			tok.Type = token.GetNumericType(tok.Literal)
-            return tok
+			return tok
 		} else {
 			tok = token.NewToken(token.ILLEGAL, l.char)
 		}
@@ -95,4 +115,22 @@ func (l *Lexer) skipWhitespace() {
 	for l.char == ' ' || l.char == '\n' || l.char == '\t' || l.char == '\r' {
 		l.readChar()
 	}
+}
+
+func (l *Lexer) getAssignOrEquals() token.Token {
+    if l.peekChar() == '=' {
+        l.readChar()
+        return token.Token{ Type: token.EQ, Literal: "==" }
+    } else {
+        return token.NewToken(token.ASSIGN, l.char)
+    }
+}
+
+func (l *Lexer) getNotOrNotEquals() token.Token {
+    if l.peekChar() == '=' {
+        l.readChar()
+        return token.Token{ Type: token.NOT_EQ, Literal: "!=" }
+    } else {
+        return token.NewToken(token.NOT, l.char)
+    }
 }

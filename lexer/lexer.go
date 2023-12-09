@@ -2,8 +2,8 @@
 package lexer
 
 import (
-	"github.com/ljpurcell/monkey-interpreter/token"
-	"github.com/ljpurcell/monkey-interpreter/utils"
+	"github.com/ljpurcell/ape-interpreter/token"
+	"github.com/ljpurcell/ape-interpreter/utils"
 )
 
 type Lexer struct {
@@ -45,7 +45,7 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.char {
 	case '=':
-        tok = l.getAssignOrEquals()
+		tok = l.getAssignOrEquals()
 	case ';':
 		tok = token.NewToken(token.SEMICOLON, l.char)
 	case '(':
@@ -67,7 +67,7 @@ func (l *Lexer) NextToken() token.Token {
 	case '}':
 		tok = token.NewToken(token.RBRACE, l.char)
 	case '!':
-    tok = l.getNotOrNotEquals()
+		tok = l.getNotOrNotEquals()
 	case '<':
 		tok = token.NewToken(token.LT, l.char)
 	case '>':
@@ -118,19 +118,19 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) getAssignOrEquals() token.Token {
-    if l.peekChar() == '=' {
-        l.readChar()
-        return token.Token{ Type: token.EQ, Literal: "==" }
-    } else {
-        return token.NewToken(token.ASSIGN, l.char)
-    }
+	if l.peekChar() == '=' {
+		l.readChar()
+		return token.Token{Type: token.EQ, Literal: "=="}
+	} else {
+		return token.NewToken(token.ASSIGN, l.char)
+	}
 }
 
 func (l *Lexer) getNotOrNotEquals() token.Token {
-    if l.peekChar() == '=' {
-        l.readChar()
-        return token.Token{ Type: token.NOT_EQ, Literal: "!=" }
-    } else {
-        return token.NewToken(token.NOT, l.char)
-    }
+	if l.peekChar() == '=' {
+		l.readChar()
+		return token.Token{Type: token.NOT_EQ, Literal: "!="}
+	} else {
+		return token.NewToken(token.NOT, l.char)
+	}
 }
